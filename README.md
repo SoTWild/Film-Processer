@@ -1,6 +1,6 @@
 # 胶片冲洗机自动化控制方案
 
-###### 【Designed by Dioxgen】[![](https://img.shields.io/badge/My%20Website-Quillset.com-brightgreen.svg)](https://Quillset.com)![](https://img.shields.io/badge/Licence-GNU-blue)![](https://img.shields.io/badge/Version-2.0-red)![](https://img.shields.io/badge/Platform-Arduino-success)![](https://img.shields.io/badge/Language-C%2FC%2B%2B-blueviolet)
+###### 【Designed by Dioxgen】[![](https://img.shields.io/badge/My%20Website-Quillset.com-brightgreen.svg)](https://Quillset.com)![](https://img.shields.io/badge/Licence-GPL-blue)![](https://img.shields.io/badge/Version-2.0-red)![](https://img.shields.io/badge/Platform-Arduino-success)![](https://img.shields.io/badge/Language-C%2FC%2B%2B-blueviolet)
 
 ## 概述
 
