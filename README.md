@@ -1,10 +1,10 @@
 # 胶片冲洗机自动化控制方案
 
-###### 【Designed by SoTWild】[![](https://img.shields.io/badge/My%20Website-Quillset.com-brightgreen.svg)](https://Quillset.com)![](https://img.shields.io/badge/Licence-GNU-blue)![](https://img.shields.io/badge/Version-2.0-red)![](https://img.shields.io/badge/Language-C%2FC%2B%2B-blueviolet)
+###### 【Designed by Dioxgen】[![](https://img.shields.io/badge/My%20Website-Quillset.com-brightgreen.svg)](https://Quillset.com)![](https://img.shields.io/badge/Licence-GNU-blue)![](https://img.shields.io/badge/Version-2.0-red)![](https://img.shields.io/badge/Platform-Github-success)![](https://img.shields.io/badge/Language-C%2FC%2B%2B-blueviolet)
 
 ## 概述
 
-这是一款基于 `Atmega328p` 设计的胶片滚冲机自动化控制总成。
+这是一款基于 `Atmega328p` 设计的**胶片滚冲机**自动化控制**总成**。
 
 <img src=".\Images\成品.jpg" alt="成品" style="zoom:33%;" />
 
@@ -145,6 +145,62 @@
 - 步骤结束前 5 秒：持续 2 秒蜂鸣
 - 步骤完成：3 次蜂鸣（1 秒响，1 秒间隔）
 
+### 5）代码示例：
+
+状态机：
+
+```c
+// 系统状态定义
+enum State { HOME,
+             SET_CUSTOM,
+             RUNNING,
+             DONE };
+```
+工艺结构：
+```c
+// 预设工艺参数
+ProcessStep c41Steps[] = {
+  { "Color Dev", 37.8, 195 },  // 3分15秒
+  { "Bleach", 37.0, 390 },     // 6分30秒
+  { "Wash", 37.0, 195 },       // 3分15秒
+  { "Fix", 37.0, 390 },        // 6分30秒
+  { "Wash", 37.0, 195 },       // 3分15秒
+  { "Stabilize", 37.0, 90 }    // 1分30秒
+};
+const int c41StepCount = sizeof(c41Steps) / sizeof(ProcessStep);
+```
+温控逻辑：
+```c
+// 快速加热阶段(36度以下)
+if (currentTemp < 36.0) {
+  if (currentTemp < 35.0) {
+    // 35度以下：双加热棒同时工作
+    digitalWrite(HEATER_4KW, HIGH);
+    digitalWrite(HEATER_450W, HIGH);
+  } else {
+    // 35-36度：关闭4KW，保留450W
+    digitalWrite(HEATER_4KW, LOW);
+    digitalWrite(HEATER_450W, HIGH);
+  }
+  // 检测快速加热完成
+  if (currentTemp >= 36.0 && !fastHeatCompleted) {
+    currentBuzzerEvent = FAST_HEAT_DONE;
+    buzzerStartTime = millis();
+    fastHeatCompleted = true;
+  }
+}
+// 目标温度控制阶段
+else {
+  digitalWrite(HEATER_4KW, LOW);  // 4KW关闭
+  // 精确控温(±0.2℃)
+  if (currentTemp < targetTemp - 0.2) {
+    digitalWrite(HEATER_450W, HIGH);
+  } else if (currentTemp > targetTemp + 0.2) {
+    digitalWrite(HEATER_450W, LOW);
+  }
+}
+```
+
 ------
 
 ## 注意事项：
@@ -154,15 +210,25 @@
 #### 安全注意事项：
 
 - 确保所有电气连接防水
-- 加热时勿触摸加热棒
+- 加热时请勿触摸加热棒
 - 定期检查温度传感器精度
-- 保持电机传动部件清洁
+- 接线与器件符合功率要求
+
+> 以下是一些常见 AWG 规格及其对应的电流承载能力：
+>
+> - 10 AWG: 30A
+> - 12 AWG: 20A
+> - 14 AWG: 15A
+> - 16 AWG: 10A
+> - 18 AWG: 7A
+> - 20 AWG: 5A
+> - 22 AWG: 3A
 
 #### 连线：
 
-注意连线正负极。两大功率继电器线圈与主板端子连接。
+注意连线正负极，两个大功率继电器线圈与主板端子的连接。
 
-`RELAY1` 与 `RELAY2` 多余引脚剪去即可。
+焊接时 `RELAY1` 与 `RELAY2` 多余引脚剪去即可。
 
 ------
 
